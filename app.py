@@ -117,8 +117,8 @@ body{font-family:'Hiragino Sans','Yu Gothic',sans-serif;background:#1a2332;min-h
 .count{font-size:3em;font-weight:800;line-height:1;transition:transform .15s}
 .count.bump{transform:scale(1.3)}
 .unit{font-size:.72em;font-weight:600;opacity:.7;margin-top:2px}
-.minus-btn{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;font-size:1.1em;font-weight:700;display:flex;align-items:center;justify-content:center;opacity:.55;transition:opacity .15s;line-height:1}
-.minus-btn:active{opacity:1}
+.minus-btn{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;font-size:1.4em;font-weight:700;display:flex;align-items:center;justify-content:center;opacity:.65;transition:opacity .15s;line-height:1;touch-action:manipulation;z-index:10}
+.minus-btn:active{opacity:1;transform:scale(.9)}
 /* floating +1 animation */
 .ripple{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);font-size:1.6em;font-weight:800;pointer-events:none;animation:floatup .6s ease-out forwards;opacity:1}
 @keyframes floatup{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-120%) scale(1.4);opacity:0}}
@@ -153,7 +153,7 @@ function init(){
     card.id='card-'+cat;
     card.style.cssText=`background:${c.bg};color:${c.accent}`;
     card.innerHTML=`
-      <button class="minus-btn" id="minus-${cat}" style="background:${c.accent};color:${c.bg}" onclick="tap(event,'${cat}',-1)">−</button>
+      <button class="minus-btn" id="minus-${cat}" style="background:${c.accent};color:${c.bg}" ontouchstart="tap(event,'${cat}',-1)" onclick="tap(event,'${cat}',-1)">−</button>
       <div class="card-top">
         <span class="icon">${c.icon}</span>
         <span class="name">${cat}</span>
@@ -162,10 +162,14 @@ function init(){
         <span class="count" id="cnt-${cat}">0</span>
         <span class="unit">件</span>
       </div>`;
-    card.addEventListener('click', e=>{
-      if(e.target.classList.contains('minus-btn'))return;
-      tap(e, cat, 1);
-    });
+    const addHandler = (ev) => {
+      card.addEventListener(ev, e=>{
+        if(e.target.closest('.minus-btn'))return;
+        tap(e, cat, 1);
+      });
+    };
+    addHandler('click');
+    addHandler('touchstart');
     g.appendChild(card);
   });
   refresh();
