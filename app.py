@@ -108,20 +108,22 @@ body{font-family:'Hiragino Sans','Yu Gothic',sans-serif;background:#1a2332;min-h
 .dot{width:8px;height:8px;border-radius:50%;background:#2ecc71;display:inline-block}
 .dot.old{background:#e74c3c}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;padding:14px;flex:1}
-.card{border-radius:16px;padding:18px 14px 14px;cursor:pointer;transition:transform .1s;position:relative;user-select:none;display:flex;flex-direction:column;align-items:center;min-height:160px;justify-content:space-between}
-.card:active{transform:scale(.94)}
-.card-top{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%}
+.card{border-radius:16px;overflow:hidden;user-select:none;display:flex;flex-direction:column;position:relative}
+.card-info{display:flex;flex-direction:column;align-items:center;padding:16px 12px 12px;gap:4px}
 .icon{font-size:2em;line-height:1}
 .name{font-size:.82em;font-weight:700;text-align:center;line-height:1.35}
 .count-wrap{display:flex;flex-direction:column;align-items:center;margin:6px 0 2px}
-.count{font-size:3em;font-weight:800;line-height:1;transition:transform .15s}
-.count.bump{transform:scale(1.3)}
+.count{font-size:3em;font-weight:800;line-height:1;transition:transform .12s}
+.count.bump{transform:scale(1.28)}
 .unit{font-size:.72em;font-weight:600;opacity:.7;margin-top:2px}
-.minus-btn{position:absolute;top:8px;right:8px;width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;font-size:1.4em;font-weight:700;display:flex;align-items:center;justify-content:center;opacity:.65;transition:opacity .15s;line-height:1;touch-action:manipulation;z-index:10}
-.minus-btn:active{opacity:1;transform:scale(.9)}
-/* floating +1 animation */
-.ripple{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);font-size:1.6em;font-weight:800;pointer-events:none;animation:floatup .6s ease-out forwards;opacity:1}
-@keyframes floatup{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-120%) scale(1.4);opacity:0}}
+.card-btns{display:grid;grid-template-columns:1fr 1fr;border-top:2px solid rgba(0,0,0,.12)}
+.btn-minus,.btn-plus{border:none;cursor:pointer;padding:14px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;touch-action:manipulation;transition:filter .1s;-webkit-tap-highlight-color:transparent}
+.btn-minus:active,.btn-plus:active{filter:brightness(.82)}
+.btn-minus{border-right:1px solid rgba(0,0,0,.1)}
+.btn-sym{font-size:1.8em;font-weight:800;line-height:1}
+.btn-lbl{font-size:.68em;font-weight:600;opacity:.8}
+.ripple{position:absolute;top:35%;left:50%;transform:translate(-50%,-50%);font-size:1.6em;font-weight:800;pointer-events:none;animation:floatup .6s ease-out forwards}
+@keyframes floatup{0%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-130%) scale(1.4);opacity:0}}
 .footer{background:#2E4057;color:#aac;font-size:.72em;text-align:center;padding:8px;display:flex;justify-content:center;gap:16px}
 .footer a{color:#88aacc;text-decoration:none}
 </style>
@@ -151,25 +153,32 @@ function init(){
     const card=document.createElement('div');
     card.className='card';
     card.id='card-'+cat;
-    card.style.cssText=`background:${c.bg};color:${c.accent}`;
+    card.style.background=c.bg;
+
+    const minusBg=`rgba(192,57,43,0.15)`;
+    const plusBg=`rgba(0,0,0,0.08)`;
+
     card.innerHTML=`
-      <button class="minus-btn" id="minus-${cat}" style="background:${c.accent};color:${c.bg}" ontouchstart="tap(event,'${cat}',-1)" onclick="tap(event,'${cat}',-1)">−</button>
-      <div class="card-top">
+      <div class="card-info">
         <span class="icon">${c.icon}</span>
-        <span class="name">${cat}</span>
+        <span class="name" style="color:${c.accent}">${cat}</span>
+        <div class="count-wrap">
+          <span class="count" id="cnt-${cat}" style="color:${c.accent}">0</span>
+          <span class="unit" style="color:${c.accent}">件</span>
+        </div>
       </div>
-      <div class="count-wrap">
-        <span class="count" id="cnt-${cat}">0</span>
-        <span class="unit">件</span>
+      <div class="card-btns">
+        <button class="btn-minus" style="background:${minusBg};color:#C0392B"
+          ontouchstart="tap(event,'${cat}',-1)" onclick="tap(event,'${cat}',-1)">
+          <span class="btn-sym">−</span>
+          <span class="btn-lbl">取消</span>
+        </button>
+        <button class="btn-plus" style="background:${plusBg};color:${c.accent}"
+          ontouchstart="tap(event,'${cat}',1)" onclick="tap(event,'${cat}',1)">
+          <span class="btn-sym">＋</span>
+          <span class="btn-lbl">カウント</span>
+        </button>
       </div>`;
-    const addHandler = (ev) => {
-      card.addEventListener(ev, e=>{
-        if(e.target.closest('.minus-btn'))return;
-        tap(e, cat, 1);
-      });
-    };
-    addHandler('click');
-    addHandler('touchstart');
     g.appendChild(card);
   });
   refresh();
@@ -187,12 +196,12 @@ function tap(e, cat, delta){
     const el=document.getElementById('cnt-'+cat);
     el.classList.add('bump');
     setTimeout(()=>el.classList.remove('bump'),160);
-    const card=document.getElementById('card-'+cat);
+    const info=document.querySelector('#card-'+cat+' .card-info');
     const rip=document.createElement('span');
     rip.className='ripple';
     rip.style.color=COLORS[cat].accent;
     rip.textContent='+1';
-    card.appendChild(rip);
+    info.appendChild(rip);
     setTimeout(()=>rip.remove(),620);
   }
   // Send to server
