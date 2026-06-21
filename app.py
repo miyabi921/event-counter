@@ -169,12 +169,12 @@ function init(){
       </div>
       <div class="card-btns">
         <button class="btn-minus" style="background:${minusBg};color:#C0392B"
-          ontouchstart="tap(event,'${cat}',-1)" onclick="tap(event,'${cat}',-1)">
+          ontouchstart="tap(event,'${cat}',-1);event.preventDefault()" onclick="tap(event,'${cat}',-1)">
           <span class="btn-sym">−</span>
           <span class="btn-lbl">取消</span>
         </button>
         <button class="btn-plus" style="background:${plusBg};color:${c.accent}"
-          ontouchstart="tap(event,'${cat}',1)" onclick="tap(event,'${cat}',1)">
+          ontouchstart="tap(event,'${cat}',1);event.preventDefault()" onclick="tap(event,'${cat}',1)">
           <span class="btn-sym">＋</span>
           <span class="btn-lbl">カウント</span>
         </button>
